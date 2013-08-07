@@ -15,21 +15,31 @@ if !exists("main_syntax")
   let main_syntax = 'html'
 endif
 
-ru! syntax/html.vim
+runtime! syntax/javascript.vim
+runtime! syntax/html.vim
 unlet b:current_syntax
 
 
 syn keyword swgTodo             TODO FIXME XXX contained
 
-syn cluster htmlSwgContainer   add=htmlHead,htmlTitle,htmlString,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6
-syn region  swgInside          start=/{%/ end=/%}/  keepend transparent containedin=@htmlSwgContainer
+syn cluster htmlSwgContainer   add=htmlHead,htmlTitle,htmlString,htmlH1,htmlH2,htmlH3,htmlH4,htmlH5,htmlH6,htmlLink,String
+" syn region  swgInside          start=/{(%|{)/ end=/(%|})}/  keepend transparent containedin=@htmlSwgContainer
 
-syn match   swgBrackets      "{%\|%}"                                 containedin=swgInside
+syn region   swgBrackets        start=/{%/ end=/%}/  keepend transparent containedin=@htmlSwgContainer
+syn region   swgVarBrackets     start=/{{/ end=/}}/  keepend transparent containedin=@htmlSwgContainer
 
-syn region  swgPartial         start=/{%(\s+)?include/lc=2 end=/%}/me=e-2        containedin=swgInside
+syn match swgBracketsMtch       "{{\|{%\|%}\|}}"            containedin=@htmlSwgContainer
+syn match   swgVars             "\<[A-Za-z_]\+\>"           containedin=@swgVarBrackets
 
-syn match   swgConditionals    "if\|else\|endif"                        containedin=swgInside
-syn match   swgHelpers         "for\|endfor"                              containedin=swgInside
+syn match swgFilters          "|\s?[A-Za-z_]\+"             containedin=@swgBrackets
+
+" not working
+" syn match   swgInsideError      /{[{%][{]\?/    containedin=@hbsInside
+
+syn match  swgPartial         "\<include\|partial\>"        containedin=@swgBrackets
+
+syn match   swgConditionals    "\<if\|else\|elseif\|endif\>"                containedin=@swgBrackets,@htmlSwgContainer
+syn match   swgHelpers         "\<for\|endfor\>"            containedin=@swgBrackets,@htmlSwgContainer
 
 
 " Define the default highlighting.
@@ -45,12 +55,16 @@ if version >= 508 || !exists("did_lisp_syntax_inits")
 
   HiLink swgTodo          Todo
 
-  HiLink swgBrackets    Identifier
+  HiLink swgBracketsMtch        Identifier
+  HiLink swgVarBrackets     Identifier
 
-  HiLink swgConditionals  Conditional
-  HiLink swgHelpers       Repeat
+  HiLink swgConditionals    Conditional
+  HiLink swgHelpers         Repeat
 
-  HiLink swgPartial       Include
+  HiLink swgPartial         Include
+  HiLink swgFilters         Identifier
+
+  HiLink swgVars            NONE
 
   delcommand HiLink
 endif
